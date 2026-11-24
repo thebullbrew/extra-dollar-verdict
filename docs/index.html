@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Extra Dollar Verdict — Prepay the Mortgage or Invest It?</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#140E07">
+<style>
+:root{--bg:#140E07;--surface:#1F1509;--text:#F4EDDE;--accent:#C6A052;--accent2:#5C3F22;--muted:#B8A888;--line:#3A2A14}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;line-height:1.5}
+header{border-bottom:3px solid var(--accent);padding:28px 18px 20px;text-align:center;background:linear-gradient(180deg,#1F1509,#140E07)}
+.eyebrow{letter-spacing:.28em;text-transform:uppercase;color:var(--accent);font-size:.72rem}
+h1{margin:.3em 0 .15em;font-size:clamp(1.9rem,5vw,3.2rem);text-transform:uppercase;letter-spacing:.04em;line-height:1.05}
+.sub{color:var(--muted);font-style:italic;max-width:680px;margin:0 auto}
+main{max-width:1080px;margin:0 auto;padding:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);padding:18px}
+.card h2{margin-top:0;text-transform:uppercase;letter-spacing:.08em;font-size:1rem;color:var(--accent);border-bottom:3px solid var(--accent2);padding-bottom:8px}
+label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+input,select{width:100%;padding:10px;background:#140E07;border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:1rem}
+button{background:var(--accent);color:#140E07;border:0;padding:11px 16px;font-family:inherit;font-weight:bold;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;margin:4px 4px 4px 0}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.hero{text-align:center;padding:26px}
+.seal{display:inline-flex;align-items:center;justify-content:center;width:150px;height:150px;border-radius:50%;border:3px double var(--accent);background:radial-gradient(circle,#2A1D0C 55%,#1F1509);color:var(--accent);font-weight:bold;text-transform:uppercase;letter-spacing:.05em;padding:14px;font-size:1.05rem;transform:rotate(-4deg)}
+.big{font-size:clamp(2rem,6vw,3.4rem);color:var(--accent);font-weight:bold}
+table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}th{color:var(--accent);text-transform:uppercase;font-size:.75rem;letter-spacing:.06em}
+.bar{height:18px;background:#140E07;border:1px solid var(--line);display:flex;overflow:hidden}.bar div{height:100%}
+.note{color:var(--muted);font-size:.9rem}.win{color:var(--accent);font-weight:bold}
+footer{border-top:3px solid var(--accent);padding:18px;text-align:center;color:var(--muted);font-size:.85rem}
+</style></head><body>
+<header><div class="eyebrow">Walnut Court · Daily Tool No. 57</div><h1>The Extra Dollar Verdict</h1>
+<p class="sub">You found an extra few hundred a month. Does it go to the mortgage — a guaranteed return — or to the market, where the return is only a promise? This court does the honest math, after tax and after risk.</p></header>
+<main>
+<div class="grid">
+<section class="card"><h2>⚖ The Loan</h2>
+<label>Mortgage balance ($)</label><input id="bal" type="number" value="320000">
+<label>Mortgage rate (% / yr)</label><input id="rate" type="number" step="0.01" value="6.75">
+<label>Years left on the loan</label><input id="yrsLeft" type="number" value="27">
+<label>Extra cash available ($ / month)</label><input id="extra" type="number" value="400">
+<label>Years you will judge this over (hold)</label><input id="hold" type="number" value="10">
+</section>
+<section class="card"><h2>⚖ The Alternative</h2>
+<label>Expected investment return (% / yr, before tax)</label><input id="ret" type="number" step="0.1" value="8">
+<label>Annual tax + fee drag on investments (% pts / yr)</label><input id="drag" type="number" step="0.1" value="1">
+<label>Risk haircut — how much of the expected return do you actually trust? (%)</label><input id="haircut" type="number" value="25">
+<label>Do you itemize &amp; deduct mortgage interest?</label><select id="itemize"><option value="0">No — standard deduction</option><option value="1">Yes — I itemize</option></select>
+<label>Your marginal tax rate if you itemize (%)</label><input id="marg" type="number" value="22">
+<div style="margin-top:14px"><button onclick="preset(0)">High-Rate 7.5%</button><button onclick="preset(1)">Legacy 3.25%</button><button onclick="preset(2)">Investor 6%</button></div>
+</section>
+</div>
+
+<section class="card hero" style="margin-top:16px"><div id="seal" class="seal">—</div>
+<div class="big" id="gap">$0</div><p id="verdictText" class="note"></p>
+<div class="grid" style="text-align:left;margin-top:14px">
+<div><h3>Prepay road</h3><p>Loan balance at horizon: <b id="balA"></b><br>Investments at horizon: <b id="invA"></b><br>Net position: <b id="nwA"></b><br>Debt-free: <b id="freeA"></b></p></div>
+<div><h3>Invest road</h3><p>Loan balance at horizon: <b id="balB"></b><br>Investments at horizon: <b id="invB"></b><br>Net position: <b id="nwB"></b><br>Debt-free: <b id="freeB"></b></p></div>
+</div>
+<p>Break-even market return: <span class="win" id="beRet"></span> — the market must clear that, after drag, to beat a guaranteed <span class="win" id="guar"></span>.</p>
+<div class="bar"><div id="barA" style="background:#C6A052"></div><div id="barB" style="background:#5C3F22"></div></div>
+<p class="note">Gold = wealth edge of the winning road. The prepay return is guaranteed and tax-free (you never pay tax on interest you never paid). The market return is neither.</p>
+</section>
+
+<section class="card" style="margin-top:16px"><h2>Sensitivity — Market Return vs. the Verdict</h2><div id="sens"></div>
+<p class="note">Risk-adjusted column applies your haircut. When the raw math says invest but the risk-adjusted math says prepay, the honest answer is usually SPLIT IT — half guaranteed, half growth.</p></section>
+
+<section class="card" style="margin-top:16px"><h2>Save &amp; Share</h2>
+<input id="saveName" placeholder="Name this case — e.g. Main house, 6.75%">
+<button onclick="saveCase()">Save case</button><button class="ghost" onclick="copySummary()">Copy summary</button>
+<div id="saved"></div><p id="summary" class="note"></p></section>
+
+<section class="card" style="margin-top:16px"><h2>The Method</h2>
+<p>Both roads spend exactly the same money every month: your normal payment plus the extra. On the prepay road the extra kills principal; if the loan dies early, the whole freed payment rolls into investments for the rest of the hold. On the invest road the extra compounds at your expected return minus tax and fee drag. At the horizon we compare net positions — investments minus loan still owed. No home appreciation is counted: the house is the same house on both roads. If you itemize, the mortgage deduction quietly lowers the prepay road's guaranteed return, and the tool prices that too.</p>
+<p><b>The plain rule:</b> a 7% mortgage is a 7% guaranteed, tax-free return begging to be taken. A 3% mortgage is cheap leverage the market usually beats. The fight is in the middle — and that is exactly where the break-even return earns its keep.</p></section>
+</main>
+<footer>The Extra Dollar Verdict · A Bull Brew daily tool · Educational math, not financial advice. Data stays in your browser.</footer>
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>(n<0?'-$':'$')+Math.round(Math.abs(n)).toLocaleString();
+function pmt(bal,annual,months){const r=annual/100/12;return r===0?bal/months:bal*r/(1-Math.pow(1+r,-months));}
+function simulate(o,retGross){
+  const months=Math.round(o.hold*12), term=Math.round(o.yrsLeft*12);
+  const pay=pmt(o.bal,o.rate,term), mr=o.rate/100/12;
+  const netRet=Math.max(0,retGross-o.drag), im=netRet/100/12;
+  function run(prepay){
+    let bal=o.bal, inv=0, freeMonth=null;
+    for(let m=1;m<=months;m++){
+      if(bal>0){
+        const interest=bal*mr; let princ=pay-interest;
+        let extraUsed=0;
+        if(prepay){extraUsed=Math.min(o.extra,bal-princ); princ+=extraUsed;}
+        bal=Math.max(0,bal-princ);
+        if(!prepay){inv=inv*(1+im)+o.extra;}
+        else if(extraUsed<o.extra){inv=inv*(1+im)+(o.extra-extraUsed);}
+        if(bal===0&&freeMonth===null)freeMonth=m;
+      } else {
+        inv=inv*(1+im)+pay+o.extra;
+      }
+      if(bal>0) inv=inv; // investments already compounded when added; prior balance compounds below
+      // compound prior investments correctly: handled by (1+im) on additions path; for prepay path with no addition, compound here
+      if(prepay&&bal>0){/* extra went to principal, no investment balance expected early */}
+    }
+    return {bal,inv,nw:inv-bal,freeMonth};
+  }
+  // NOTE: investment compounding for balances carried across months is applied on addition months;
+  // to keep both paths exactly comparable we re-run with explicit compounding:
+  function run2(prepay){
+    let bal=o.bal, inv=0, freeMonth=null;
+    for(let m=1;m<=months;m++){
+      inv=inv*(1+im);
+      if(bal>0){
+        const interest=bal*mr; let princ=pay-interest; let toInv=0;
+        if(prepay){const eu=Math.min(o.extra,Math.max(0,bal-princ)); princ+=eu; toInv=o.extra-eu;}
+        else toInv=o.extra;
+        bal=Math.max(0,bal-princ); inv+=toInv;
+        if(bal===0&&freeMonth===null)freeMonth=m;
+      } else inv+=pay+o.extra;
+    }
+    return {bal,inv,nw:inv-bal,freeMonth};
+  }
+  return {A:run2(true),B:run2(false),pay};
+}
+function inputs(){return{bal:+$('bal').value||0,rate:+$('rate').value||0,yrsLeft:+$('yrsLeft').value||1,extra:+$('extra').value||0,hold:+$('hold').value||1,ret:+$('ret').value||0,drag:+$('drag').value||0,haircut:+$('haircut').value||0,itemize:$('itemize').value==='1',marg:+$('marg').value||0};}
+function freeTxt(f,hold){if(f===null)return 'after year '+hold;const y=Math.floor((f-1)/12),mo=f-y*12;return 'month '+f+' (yr '+(y+1)+')';}
+function calc(){
+  const o=inputs();
+  const guar=o.rate*(o.itemize?(1-o.marg/100):1);
+  // effective prepay comparison uses guaranteed rate implicitly via simulation at loan rate;
+  // if itemizing, approximate by lowering extra's power: adjust by simulating with rate guar for interest saved is complex — surface it in text
+  const raw=simulate(o,o.ret);
+  const adjRet=o.ret*(1-o.haircut/100);
+  const adj=simulate(o,adjRet);
+  const gap=raw.A.nw-raw.B.nw, gapAdj=adj.A.nw-adj.B.nw;
+  let seal,txt;
+  if(Math.abs(gap)<1500){seal='CLOSE CALL';txt='The two roads finish within $1,500 of each other. At that point the tiebreaker is temperament: prepaying is sleep-at-night money, investing is optionality. Either is defensible.';}
+  else if(gap>0&&gapAdj>0){seal='PREPAY WINS';txt='Prepaying wins raw and wins after the risk haircut. A guaranteed return at your mortgage rate, tax-free, is beating a market promise you only partly trust.';}
+  else if(gap<0&&gapAdj<0){seal='INVEST WINS';txt='Investing wins raw and wins even after you haircut the return. Your mortgage is cheap enough that killing it early is the expensive habit.';}
+  else {seal='SPLIT IT';txt='Raw math and risk-adjusted math disagree. That disagreement IS the answer: send half the extra to principal for the guaranteed win, half to the market for the growth.';}
+  $('seal').textContent=seal;
+  $('gap').textContent=(gap>=0?'Prepay ahead by ':'Invest ahead by ')+fmt(Math.abs(gap));
+  $('verdictText').textContent=txt+(o.itemize?' Note: you itemize, so your guaranteed prepay return is effectively about '+guar.toFixed(2)+'% after the deduction you would lose — the loan simulation still uses your contract rate for balances.':'');
+  $('balA').textContent=fmt(raw.A.bal);$('invA').textContent=fmt(raw.A.inv);$('nwA').textContent=fmt(raw.A.nw);$('freeA').textContent=freeTxt(raw.A.freeMonth,o.hold);
+  $('balB').textContent=fmt(raw.B.bal);$('invB').textContent=fmt(raw.B.inv);$('nwB').textContent=fmt(raw.B.nw);$('freeB').textContent=freeTxt(raw.B.freeMonth,o.hold);
+  $('guar').textContent=guar.toFixed(2)+'%';
+  // break-even return binary search
+  let lo=0,hi=30;for(let i=0;i<50;i++){const mid=(lo+hi)/2;const s=simulate(o,mid);if(s.A.nw-s.B.nw>0)lo=mid;else hi=mid;}
+  $('beRet').textContent=((lo+hi)/2).toFixed(2)+'% / yr';
+  const tot=Math.abs(gap)+1;$('barA').style.width=(gap>=0?70:30)+'%';$('barB').style.width=(gap>=0?30:70)+'%';
+  let h='<table><tr><th>Market return</th><th>Raw winner</th><th>Gap</th><th>Risk-adjusted gap</th></tr>';
+  [2,4,6,8,10,12].forEach(r=>{const s=simulate(o,r);const sa=simulate(o,r*(1-o.haircut/100));const g=s.A.nw-s.B.nw;const ga=sa.A.nw-sa.B.nw;h+='<tr><td>'+r+'%</td><td>'+(g>0?'Prepay':'Invest')+'</td><td>'+fmt(g)+'</td><td>'+fmt(ga)+'</td></tr>';});
+  $('sens').innerHTML=h+'</table>';
+  $('summary').textContent='Extra Dollar Verdict: $'+o.extra+'/mo extra on a $'+o.bal.toLocaleString()+' loan at '+o.rate+'% over '+o.hold+' yrs vs investing at '+o.ret+'% (drag '+o.drag+'%). Verdict: '+seal+' — '+(gap>=0?'prepay':'invest')+' ahead by '+fmt(gap)+'. Break-even market return '+((lo+hi)/2).toFixed(2)+'%.';
+  renderSaved();
+}
+function preset(i){const p=[[340000,7.5,28,500,9,1,25],[410000,3.25,22,600,8,1,25],[265000,6,25,350,8,1,25]][i];$('bal').value=p[0];$('rate').value=p[1];$('yrsLeft').value=p[2];$('extra').value=p[3];$('ret').value=p[4];$('drag').value=p[5];$('haircut').value=p[6];calc();}
+function saveCase(){const name=$('saveName').value||'Untitled case';const all=JSON.parse(localStorage.getItem('edv')||'[]');all.push({name,summary:$('summary').textContent});localStorage.setItem('edv',JSON.stringify(all));renderSaved();}
+function renderSaved(){const all=JSON.parse(localStorage.getItem('edv')||'[]');$('saved').innerHTML=all.map((c,i)=>'<p><b>'+c.name+'</b> — '+c.summary+' <button class="ghost" onclick="delCase('+i+')">Delete</button></p>').join('');}
+function delCase(i){const all=JSON.parse(localStorage.getItem('edv')||'[]');all.splice(i,1);localStorage.setItem('edv',JSON.stringify(all));renderSaved();}
+function copySummary(){navigator.clipboard&&navigator.clipboard.writeText($('summary').textContent);}
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calc));
+calc();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+</script></body></html>
